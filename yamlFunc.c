@@ -2,18 +2,7 @@
 
 int main(void)
 {
-    clearFile("TEMP.yaml");
 
-    writeNewVal("TEMP.yaml", "test", "mess best");
-    writeNewVal("TEMP.yaml", "mess", "");
-    writeNewVal("TEMP.yaml", "bob", "test");
-
-    writeChild("TEMP.yaml", "mess", "hammer", "nail");
-    //char *temp = malloc(INT_MAX);
-    //printf("%s\n", temp);
-
-    //free(temp);
-    return 0;
 }
 
 //* writes a new key value pair to a yaml file
@@ -21,13 +10,8 @@ int main(void)
 void writeNewVal(char *filename, char *key, char *value)
 {
     FILE *yamlFile = fopen(filename, "a");
-    if (getc(yamlFile) != '\n' && (ftell(yamlFile) != 0))
-    {
-        fputc('\n', yamlFile);
-    }
-    else
         fseek(yamlFile, -1, SEEK_CUR);
-    fprintf(yamlFile, "%s: %s", key, value);
+    fprintf(yamlFile, "%s: %s\n", key, value);
     fclose(yamlFile);
 }
 
@@ -43,7 +27,7 @@ void writeChild(char *filename, char *parent, char *key, char *value)
     if (keyLine == countLines(filename))
     {
         FILE *mainFile = fopen(filename, "a");
-        fprintf(mainFile, "\n  %s: %s", key, value);
+        fprintf(mainFile, "\n  %s: %s\n", key, value);
         return;
     }
     moveBelowDown(filename, keyLine);
@@ -87,15 +71,15 @@ void writeChild(char *filename, char *parent, char *key, char *value)
 
 //* Reads a value from a given YAML file when given a key
 //! storeValue may want to be size INT_MAX or just a blank ptr
-void *readVal(char *filename, char *key, char **storeValue)
+void readVal(char *filename, char *key, char **storeValue)
 {
     FILE *yamlFile = fopen(filename, "r");
-    int foundValue = 0;
+    int endOfFile = 0;
     char fullKey[50];
     strcpy(fullKey, key);
     strcat(fullKey, ":");
 
-    while (!foundValue)
+    while (!endOfFile)
     {
         char *currentKey = malloc(sizeof(char) * 50);
         fscanf(yamlFile, "%s", currentKey);
@@ -103,15 +87,15 @@ void *readVal(char *filename, char *key, char **storeValue)
         {
             fgets(*storeValue, INT_MAX, yamlFile);
             int valueLength = strlen(*storeValue);
-            *(*storeValue + (valueLength-1)) = '\0';
+            if (getKeyLine(filename, fullKey) != countLines(filename))
+                *(*storeValue + (valueLength-1)) = '\0';
 
-            foundValue = 1;
             free(currentKey);
             fclose(yamlFile);
-            return *storeValue;
+            return;
         }
         if (fgetc(yamlFile) == EOF)
-            foundValue = 1;
+            endOfFile = 1;
         fseek(yamlFile, -1, SEEK_CUR);
         char trash[600];
         fgets(trash, 600, yamlFile);
@@ -119,6 +103,84 @@ void *readVal(char *filename, char *key, char **storeValue)
     }
     fclose(yamlFile);
     strcpy(*storeValue, "KEY_NOT_FOUND");
+}
+
+void readChild(char *filename, char *parent, char *child, char **storeValue)
+{
+    //* setup
+    char fullParent[50];
+    strcpy(fullParent, parent);
+    strcat(fullParent, ":");
+    char fullChild[50];
+    strcpy(fullChild, child);
+    strcat(fullChild, ":");
+    
+    //* find parent
+    int parentLine = getKeyLine(filename, fullParent);
+    
+    FILE *yamlFile = fopen(filename, "r");
+    for (int iii = 0; parentLine > iii; iii++)
+    {
+        char *trash = malloc(sizeof(char) * INT_MAX);
+        fgets(trash, INT_MAX, yamlFile);
+        free(trash);
+    }
+    
+    // * get child value
+    while(1)
+    {
+        int ch;
+        if((ch = getc(yamlFile)) != ' ')
+        {
+            printf("[%d]\n", ch);
+            strcpy(*storeValue, "CHILD_NOT_FOUND");
+            return; 
+        }
+        char *currentChild = malloc(sizeof(char) * 50);
+        fscanf(yamlFile, "%s", currentChild);
+        if (!strcmp(currentChild, fullChild))
+        {
+            fgets(*storeValue, INT_MAX, yamlFile);
+            int valueLength = strlen(*storeValue);
+            *(*storeValue + (valueLength-1)) = '\0';
+
+            free(currentChild);
+            fclose(yamlFile);
+            return;
+        }
+        char trash[600];
+        fgets(trash, 600, yamlFile);
+    }
+}
+
+void lastParentRead(FILE *yamlFile, char *fullChild, char **storeValue)
+{
+    while(1)
+    {
+        printf("TEST\n");
+        int ch;
+        if((ch = getc(yamlFile)) == EOF)
+        {
+            printf("[%d]\n", ch);
+            strcpy(*storeValue, "CHILD_NOT_FOUND");
+            return; 
+        }
+        char *currentChild = malloc(sizeof(char) * 50);
+        fscanf(yamlFile, "%s", currentChild);
+        printf("currentParent: %s\n", currentChild);
+        if (!strcmp(currentChild, fullChild))
+        {
+            fgets(*storeValue, INT_MAX, yamlFile);
+            int valueLength = strlen(*storeValue);
+            *(*storeValue + (valueLength-1)) = '\0';
+
+            free(currentChild);
+            fclose(yamlFile);
+            return;
+        }
+        char trash[600];
+        fgets(trash, 600, yamlFile);
+    }
 }
 
 //* finds the line of a key
@@ -204,5 +266,4 @@ int countLines(char *filename)
 
     return lines;
 }
-
 
