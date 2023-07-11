@@ -2,7 +2,8 @@
 
 int main(void)
 {
-
+    writeNewVal("TEMP.yaml", "test", "whale");
+    writeNewVal("TEMP.yaml", "mail", "gale");
 }
 
 //* writes a new key value pair to a yaml file
