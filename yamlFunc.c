@@ -2,19 +2,7 @@
 
 int main(void)
 {
-    clearFile("TEMP.yaml");
-    writeNewVal("TEMP.yaml", "test", "");
-        writeNewVal("TEMP.yaml", "bob", "");
-    writeNewVal("TEMP.yaml", "mail", "");
-    char **seq = malloc((sizeof(char) * INT_MAX) * 3); 
-    *(seq) = "This is seq";
-    *(seq + 1) = "This is seq1";
-    *(seq + 2) = "This is seq2";
-
-    writeSequence("TEMP.yaml", "bob", seq, 3);
-
-
-    free(seq);
+    
 }
 
 //* writes a new key value pair to a yaml file
