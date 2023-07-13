@@ -1,2 +1,6 @@
-test: whale
-mail: gale
+test: 
+bob: 
+  - This is seq
+  - This is seq1
+  - This is seq2
+mail: 

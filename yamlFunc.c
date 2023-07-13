@@ -2,8 +2,19 @@
 
 int main(void)
 {
-    writeNewVal("TEMP.yaml", "test", "whale");
-    writeNewVal("TEMP.yaml", "mail", "gale");
+    clearFile("TEMP.yaml");
+    writeNewVal("TEMP.yaml", "test", "");
+        writeNewVal("TEMP.yaml", "bob", "");
+    writeNewVal("TEMP.yaml", "mail", "");
+    char **seq = malloc((sizeof(char) * INT_MAX) * 3); 
+    *(seq) = "This is seq";
+    *(seq + 1) = "This is seq1";
+    *(seq + 2) = "This is seq2";
+
+    writeSequence("TEMP.yaml", "bob", seq, 3);
+
+
+    free(seq);
 }
 
 //* writes a new key value pair to a yaml file
@@ -25,12 +36,6 @@ void writeChild(char *filename, char *parent, char *key, char *value)
     strcat(fullParent, ":");
 
     int keyLine = getKeyLine(filename, fullParent);
-    if (keyLine == countLines(filename))
-    {
-        FILE *mainFile = fopen(filename, "a");
-        fprintf(mainFile, "\n  %s: %s\n", key, value);
-        return;
-    }
     moveBelowDown(filename, keyLine);
 
     // Write to temp with the new line
@@ -68,7 +73,54 @@ void writeChild(char *filename, char *parent, char *key, char *value)
     remove("temp-jkaksdfka.txt");
 }
 
+void writeSequence(char *filename, char *parent, char **sequence, int sequenceLength)
+{
+    char fullParent[50];
+    strcpy(fullParent, parent);
+    strcat(fullParent, ":");
 
+    int keyLine = getKeyLine(filename, fullParent);
+    
+    moveBelowDown(filename, keyLine);
+
+    // Write to temp with the new line
+    FILE *mainFile = fopen(filename, "r");
+    FILE *tempFile = fopen("temp-jkaksdfka.txt", "w");
+    int currentLines = 0;
+    int ch;
+    while((ch = getc(mainFile)) != EOF)
+    {
+        fputc(ch, tempFile);
+        if(ch == '\n')
+        {
+            currentLines++;
+            if (currentLines == keyLine)
+            {
+                for(int iii = 0; sequenceLength > iii; iii++)
+                    if (iii == sequenceLength - 1)
+                        fprintf(tempFile, "  - %s", *(sequence + iii));
+                    else
+                        fprintf(tempFile, "  - %s\n", *(sequence + iii));
+
+            }
+        }
+    }
+
+    fclose(tempFile);
+    fclose(mainFile);
+
+    //copying back to yaml w/ newline
+    mainFile = fopen(filename, "w");
+    tempFile = fopen("temp-jkaksdfka.txt", "r");
+    while((ch = getc(tempFile)) != EOF)
+    {
+        fputc(ch, mainFile);
+    }
+
+    fclose(mainFile);        
+    fclose(tempFile);
+    remove("temp-jkaksdfka.txt");
+}
 
 //* Reads a value from a given YAML file when given a key
 //! storeValue may want to be size INT_MAX or just a blank ptr
@@ -154,35 +206,7 @@ void readChild(char *filename, char *parent, char *child, char **storeValue)
     }
 }
 
-void lastParentRead(FILE *yamlFile, char *fullChild, char **storeValue)
-{
-    while(1)
-    {
-        printf("TEST\n");
-        int ch;
-        if((ch = getc(yamlFile)) == EOF)
-        {
-            printf("[%d]\n", ch);
-            strcpy(*storeValue, "CHILD_NOT_FOUND");
-            return; 
-        }
-        char *currentChild = malloc(sizeof(char) * 50);
-        fscanf(yamlFile, "%s", currentChild);
-        printf("currentParent: %s\n", currentChild);
-        if (!strcmp(currentChild, fullChild))
-        {
-            fgets(*storeValue, INT_MAX, yamlFile);
-            int valueLength = strlen(*storeValue);
-            *(*storeValue + (valueLength-1)) = '\0';
 
-            free(currentChild);
-            fclose(yamlFile);
-            return;
-        }
-        char trash[600];
-        fgets(trash, 600, yamlFile);
-    }
-}
 
 //* finds the line of a key
 //! full key means the key with a colon at the end so '<key>:'

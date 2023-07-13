@@ -9,10 +9,10 @@
 // functions
 void writeNewVal(char *filename, char *key, char *value);
 void writeChild(char *filename, char *parent, char *key, char *value);
+void writeSequence(char *filename, char *parent, char **sequence, int sequenceLength);
 
 void readVal(char *filename, char *key, char **storeValue);
 void readChild(char *filename, char *parent, char *child, char **storeValue);
-void lastParentRead(FILE *yamlFile, char *fullChild, char **storeValue);
 
 int getKeyLine(char *filename, char *fullKey);
 void clearFile(char *fileName);
