@@ -2,24 +2,7 @@
 
 int main(void)
 {
-    clearFile("TEMP.yaml");
-    writeNewVal("TEMP.yaml", "test", "");
-    writeNewVal("TEMP.yaml", "bob", "");
-    writeNewVal("TEMP.yaml", "mail", "");
-    char **seq = malloc((sizeof(char) * INT_MAX) * 3); 
-    *(seq) = "This is seq";
-    *(seq + 1) = "This is seq1";
-    *(seq + 2) = "This is seq2";
-
-    writeSequence("TEMP.yaml", "bob", seq, 3);
-
-    char **temp = readSequence("TEMP.yaml", "bob");
-
-    printf("%s\n%s\n%s\n", *temp, *(temp+1), *(temp+2));
-
-    freeStringArray(temp, 3);
-
-    free(seq);
+    
 }
 
 //* writes a new key value pair to a yaml file
@@ -210,7 +193,7 @@ void readChild(char *filename, char *parent, char *child, char **storeValue)
     }
 }
 
-char **readSequence(char *filename, char *parent)
+strseq *readSequence(char *filename, char *parent)
 {
     //* setup
     char fullParent[50];
@@ -265,8 +248,11 @@ char **readSequence(char *filename, char *parent)
         *(sequence+iii) = line;
         
     }
-    return sequence;
-    
+    strseq *sequenceInfo = malloc(sizeof(strseq));
+    sequenceInfo->seqLength = seqLength;
+    sequenceInfo->sequence = sequence;
+
+    return sequenceInfo;
 }
 
 
@@ -357,8 +343,6 @@ int countLines(char *filename)
 void freeStringArray(char **array, int arrayLength)
 {
     for (int iii = 0; arrayLength > iii; iii++)
-    {
         free(*(array+iii));
-    }
     free(array);
 }
