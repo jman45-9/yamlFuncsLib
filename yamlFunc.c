@@ -13,6 +13,11 @@ int main(void)
 
     writeSequence("TEMP.yaml", "bob", seq, 3);
 
+    char **temp = readSequence("TEMP.yaml", "bob");
+
+    printf("%s\n%s\n%s\n", *temp, *(temp+1), *(temp+2));
+
+    freeStringArray(temp, 3);
 
     free(seq);
 }
@@ -185,7 +190,6 @@ void readChild(char *filename, char *parent, char *child, char **storeValue)
         int ch;
         if((ch = getc(yamlFile)) != ' ')
         {
-            printf("[%d]\n", ch);
             strcpy(*storeValue, "CHILD_NOT_FOUND");
             return; 
         }
@@ -206,6 +210,64 @@ void readChild(char *filename, char *parent, char *child, char **storeValue)
     }
 }
 
+char **readSequence(char *filename, char *parent)
+{
+    //* setup
+    char fullParent[50];
+    strcpy(fullParent, parent);
+    strcat(fullParent, ":");
+    
+    //* find parent
+    int parentLine = getKeyLine(filename, fullParent);
+    
+    FILE *yamlFile = fopen(filename, "r");
+    for (int iii = 0; parentLine > iii; iii++)
+    {
+        char *trash = malloc(sizeof(char) * INT_MAX);
+        fgets(trash, INT_MAX, yamlFile);
+        free(trash);
+    }
+    
+    int seqLength = 0;
+    while(1)
+        if(getc(yamlFile) == ' ')
+        {
+            seqLength++;
+            char trash[600];
+            fgets(trash, 600, yamlFile);
+        }
+        else
+            break;
+
+    fseek(yamlFile, 0, SEEK_SET);
+
+    for (int iii = 0; parentLine > iii; iii++)
+    {
+        char *trash = malloc(sizeof(char) * INT_MAX);
+        fgets(trash, INT_MAX, yamlFile);
+        free(trash);
+    }
+
+    if (seqLength == 0)
+        return NULL;
+    
+    char **sequence = malloc((sizeof(char) * 1024) * seqLength);
+
+
+    // * get child value
+    for(int iii = 0; seqLength > iii; iii++)
+    {
+        while(fgetc(yamlFile) != '-')
+            ;
+        fgetc(yamlFile);
+        char *line = malloc(sizeof(char) * 1024);
+        fgets(line , 1024, yamlFile);
+        *(sequence+iii) = line;
+        
+    }
+    return sequence;
+    
+}
 
 
 //* finds the line of a key
@@ -292,3 +354,11 @@ int countLines(char *filename)
     return lines;
 }
 
+void freeStringArray(char **array, int arrayLength)
+{
+    for (int iii = 0; arrayLength > iii; iii++)
+    {
+        free(*(array+iii));
+    }
+    free(array);
+}

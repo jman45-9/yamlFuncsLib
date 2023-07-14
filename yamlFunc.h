@@ -13,9 +13,12 @@ void writeSequence(char *filename, char *parent, char **sequence, int sequenceLe
 
 void readVal(char *filename, char *key, char **storeValue);
 void readChild(char *filename, char *parent, char *child, char **storeValue);
+char **readSequence(char *filename, char *parent);
 
 int getKeyLine(char *filename, char *fullKey);
 void clearFile(char *fileName);
 void moveBelowDown(char *filename, int line);
 int countLines(char *filename);
+void freeStringArray(char **array, int arrayLength);
+
 #endif
