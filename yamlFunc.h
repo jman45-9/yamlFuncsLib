@@ -16,7 +16,7 @@ typedef struct strseq
 // functions
 void writeNewVal(char *filename, char *key, char *value);
 void writeChild(char *filename, char *parent, char *key, char *value);
-void writeSequence(char *filename, char *parent, char **sequence, int sequenceLength);
+void writeSequence(char *filename, char *parent, strseq *seqInfo);
 
 void readVal(char *filename, char *key, char **storeValue);
 void readChild(char *filename, char *parent, char *child, char **storeValue);

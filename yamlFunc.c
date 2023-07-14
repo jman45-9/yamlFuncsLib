@@ -2,7 +2,8 @@
 
 int main(void)
 {
-    
+
+    return 0;
 }
 
 //* writes a new key value pair to a yaml file
@@ -61,8 +62,11 @@ void writeChild(char *filename, char *parent, char *key, char *value)
     remove("temp-jkaksdfka.txt");
 }
 
-void writeSequence(char *filename, char *parent, char **sequence, int sequenceLength)
+void writeSequence(char *filename, char *parent, strseq *seqInfo)
 {
+    int sequenceLength = seqInfo->seqLength;
+    char **sequence = seqInfo->sequence;
+
     char fullParent[50];
     strcpy(fullParent, parent);
     strcat(fullParent, ":");
