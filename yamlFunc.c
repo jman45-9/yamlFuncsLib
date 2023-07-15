@@ -2,7 +2,6 @@
 
 int main(void)
 {
-
     return 0;
 }
 
@@ -20,7 +19,7 @@ void writeNewVal(char *filename, char *key, char *value)
 void writeChild(char *filename, char *parent, char *key, char *value)
 {
 
-    char fullParent[50];
+    char fullParent[MAX_KEY_LENGTH];
     strcpy(fullParent, parent);
     strcat(fullParent, ":");
 
@@ -67,7 +66,7 @@ void writeSequence(char *filename, char *parent, strseq *seqInfo)
     int sequenceLength = seqInfo->seqLength;
     char **sequence = seqInfo->sequence;
 
-    char fullParent[50];
+    char fullParent[MAX_KEY_LENGTH];
     strcpy(fullParent, parent);
     strcat(fullParent, ":");
 
@@ -120,13 +119,13 @@ void readVal(char *filename, char *key, char **storeValue)
 {
     FILE *yamlFile = fopen(filename, "r");
     int endOfFile = 0;
-    char fullKey[50];
+    char fullKey[MAX_KEY_LENGTH];
     strcpy(fullKey, key);
     strcat(fullKey, ":");
 
     while (!endOfFile)
     {
-        char *currentKey = malloc(sizeof(char) * 50);
+        char *currentKey = malloc(sizeof(char) * MAX_KEY_LENGTH);
         fscanf(yamlFile, "%s", currentKey);
         if (!strcmp(fullKey, currentKey))
         {
@@ -142,8 +141,8 @@ void readVal(char *filename, char *key, char **storeValue)
         if (fgetc(yamlFile) == EOF)
             endOfFile = 1;
         fseek(yamlFile, -1, SEEK_CUR);
-        char trash[600];
-        fgets(trash, 600, yamlFile);
+        char trash[MAX_LINE_LENGTH];
+        fgets(trash, MAX_LINE_LENGTH, yamlFile);
         free(currentKey);
     }
     fclose(yamlFile);
@@ -153,10 +152,10 @@ void readVal(char *filename, char *key, char **storeValue)
 void readChild(char *filename, char *parent, char *child, char **storeValue)
 {
     //* setup
-    char fullParent[50];
+    char fullParent[MAX_KEY_LENGTH];
     strcpy(fullParent, parent);
     strcat(fullParent, ":");
-    char fullChild[50];
+    char fullChild[MAX_KEY_LENGTH];
     strcpy(fullChild, child);
     strcat(fullChild, ":");
     
@@ -166,8 +165,8 @@ void readChild(char *filename, char *parent, char *child, char **storeValue)
     FILE *yamlFile = fopen(filename, "r");
     for (int iii = 0; parentLine > iii; iii++)
     {
-        char *trash = malloc(sizeof(char) * INT_MAX);
-        fgets(trash, INT_MAX, yamlFile);
+        char *trash = malloc(sizeof(char) * MAX_LINE_LENGTH);
+        fgets(trash, MAX_LINE_LENGTH, yamlFile);
         free(trash);
     }
     
@@ -180,11 +179,11 @@ void readChild(char *filename, char *parent, char *child, char **storeValue)
             strcpy(*storeValue, "CHILD_NOT_FOUND");
             return; 
         }
-        char *currentChild = malloc(sizeof(char) * 50);
+        char *currentChild = malloc(sizeof(char) * MAX_KEY_LENGTH);
         fscanf(yamlFile, "%s", currentChild);
         if (!strcmp(currentChild, fullChild))
         {
-            fgets(*storeValue, INT_MAX, yamlFile);
+            fgets(*storeValue, MAX_LINE_LENGTH, yamlFile);
             int valueLength = strlen(*storeValue);
             *(*storeValue + (valueLength-1)) = '\0';
 
@@ -192,15 +191,15 @@ void readChild(char *filename, char *parent, char *child, char **storeValue)
             fclose(yamlFile);
             return;
         }
-        char trash[600];
-        fgets(trash, 600, yamlFile);
+        char trash[MAX_LINE_LENGTH];
+        fgets(trash, MAX_LINE_LENGTH, yamlFile);
     }
 }
 
 strseq *readSequence(char *filename, char *parent)
 {
     //* setup
-    char fullParent[50];
+    char fullParent[MAX_KEY_LENGTH];
     strcpy(fullParent, parent);
     strcat(fullParent, ":");
     
@@ -210,8 +209,8 @@ strseq *readSequence(char *filename, char *parent)
     FILE *yamlFile = fopen(filename, "r");
     for (int iii = 0; parentLine > iii; iii++)
     {
-        char *trash = malloc(sizeof(char) * INT_MAX);
-        fgets(trash, INT_MAX, yamlFile);
+        char *trash = malloc(sizeof(char) * MAX_LINE_LENGTH);
+        fgets(trash, MAX_LINE_LENGTH, yamlFile);
         free(trash);
     }
     
@@ -220,8 +219,8 @@ strseq *readSequence(char *filename, char *parent)
         if(getc(yamlFile) == ' ')
         {
             seqLength++;
-            char trash[600];
-            fgets(trash, 600, yamlFile);
+            char trash[MAX_LINE_LENGTH];
+            fgets(trash, MAX_LINE_LENGTH, yamlFile);
         }
         else
             break;
@@ -230,15 +229,15 @@ strseq *readSequence(char *filename, char *parent)
 
     for (int iii = 0; parentLine > iii; iii++)
     {
-        char *trash = malloc(sizeof(char) * INT_MAX);
-        fgets(trash, INT_MAX, yamlFile);
+        char *trash = malloc(sizeof(char) * MAX_LINE_LENGTH);
+        fgets(trash, MAX_LINE_LENGTH, yamlFile);
         free(trash);
     }
 
     if (seqLength == 0)
         return NULL;
     
-    char **sequence = malloc((sizeof(char) * 1024) * seqLength);
+    char **sequence = malloc((sizeof(char) * MAX_LINE_LENGTH) * seqLength);
 
 
     // * get child value
@@ -247,8 +246,8 @@ strseq *readSequence(char *filename, char *parent)
         while(fgetc(yamlFile) != '-')
             ;
         fgetc(yamlFile);
-        char *line = malloc(sizeof(char) * 1024);
-        fgets(line , 1024, yamlFile);
+        char *line = malloc(sizeof(char) * MAX_LINE_LENGTH);
+        fgets(line , MAX_LINE_LENGTH, yamlFile);
         *(sequence+iii) = line;
         
     }
@@ -269,7 +268,7 @@ int getKeyLine(char *filename, char *fullKey)
     int lines = 1;
     while (1)
     {
-        char *currentKey = malloc(sizeof(char) * 50);
+        char *currentKey = malloc(sizeof(char) * MAX_KEY_LENGTH);
         fscanf(file, "%s", currentKey);
         if (!strcmp(currentKey, fullKey))
         {
@@ -279,8 +278,8 @@ int getKeyLine(char *filename, char *fullKey)
         else
             lines++;
         
-        char trash[600];
-        fgets(trash, 600, file);
+        char trash[MAX_KEY_LENGTH];
+        fgets(trash, MAX_KEY_LENGTH, file);
         if (getc(file) == EOF)
         {
             free(currentKey);

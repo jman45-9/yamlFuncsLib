@@ -1,6 +1,9 @@
 #ifndef YAML_FUNC
 #define YAML_FUNC
 
+// macros
+#define MAX_LINE_LENGTH 1024
+#define MAX_KEY_LENGTH 51
 // needed headers
 #include <stdio.h>
 #include <string.h>
